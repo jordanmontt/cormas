@@ -189,10 +189,7 @@ Reset the currentTimeStep and the data. Set the randomSeed"
 	| simulation |
 	
 	"TODO: A temporary hack to fix the bug with parameters being reset when we reinitialize a model"
-	simulation := CMSimulation new
-		cormasModel: modelClass newWithoutParameters;
-		initializeProbes;
-		yourself.
+	simulation := 	simulation := CMSimulation for: modelClass.
 
 	modelClass parameters do: [ :parameter |
 		simulation initialParameterValues at: parameter put: parameter value ].

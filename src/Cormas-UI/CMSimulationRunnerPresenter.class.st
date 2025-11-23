@@ -224,10 +224,7 @@ CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 		(Delay forMilliseconds: simulationControls speedInMilliseconds) wait ]
 	] ensure: [
 		shouldPause := false.
-		simulationControls beInPauseMode ].
- 
-	shouldPause := false.
-	simulationControls beInPauseMode ] fork.
+		simulationControls beInPauseMode ] ] fork.
 ]
 
 { #category : 'accessing - model' }
