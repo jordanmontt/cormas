@@ -56,7 +56,7 @@ CMSimulationInitializationSettingsPresenter >> defaultLayout [
 
 	gridLayout
 		borderWidth: 0;
-		beColumnNotHomogeneous;
+		beColumnHomogeneous;
 		column: 2 expand: true;
 		build: [ :builder |
 				builder
@@ -65,22 +65,20 @@ CMSimulationInitializationSettingsPresenter >> defaultLayout [
 					nextRow;
 					add: translator tRandomSeed;
 					add: randomSeedInput;
-					nextRow ].
+					nextRow;
+					add: translator tInitMethod;
+					nextRow;
+					add: releaseRandomSeedCheckbox;
+					nextRow;
+					add: initSelectorDropList span: 2 @ 1;
+					nextRow;
+					add: translator tControlMethod;
+					nextRow;
+					add: controlSelectorDropList span: 2 @ 1 ].
 
 	^ SpBoxLayout newTopToBottom
 		  spacing: 12;
-		  add: gridLayout;
-		  add: (SpBoxLayout newTopToBottom
-				   add: translator tInitMethod;
-				   add: initSelectorDropList;
-				   yourself)
-		  expand: false;
-		  add: releaseRandomSeedCheckbox expand: false;
-		  add: (SpBoxLayout newTopToBottom
-				   add: translator tControlMethod;
-				   add: controlSelectorDropList;
-				   yourself)
-		  expand: false;
+		  add: gridLayout expand: true;
 		  yourself
 ]
 
