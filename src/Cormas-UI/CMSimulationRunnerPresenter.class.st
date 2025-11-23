@@ -239,6 +239,9 @@ CMSimulationRunnerPresenter >> setModelBeforeInitialization: aTranslator [
 { #category : 'accessing' }
 CMSimulationRunnerPresenter >> shouldPause: aBoolean [
 
+	aBoolean
+		ifTrue: [ simulationControls beInPauseMode ]
+		ifFalse: [ simulationControls beInRunningMode ].
 	shouldPause := aBoolean
 ]
 

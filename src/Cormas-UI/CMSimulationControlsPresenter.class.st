@@ -136,8 +136,10 @@ CMSimulationControlsPresenter >> initializeRunButtonWithRunAction [
 		icon: CMIcons runIcon;
 		action: [
 				isFirstTimeExecuting
-					ifTrue: [ owner runSimulationUntilEnd ]
-					ifFalse: [ owner shouldPause: true ] ]
+					ifTrue: [
+							owner runSimulationUntilEnd.
+							isFirstTimeExecuting := false ]
+					ifFalse: [ owner shouldPause: false ] ]
 ]
 
 { #category : 'accessing - model' }
