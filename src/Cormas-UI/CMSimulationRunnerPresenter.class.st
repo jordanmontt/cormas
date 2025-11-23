@@ -56,9 +56,9 @@ CMSimulationRunnerPresenter class >> openForSimulation: aSimulation withTranslat
 ]
 
 { #category : 'as yet unclassified' }
-CMSimulationRunnerPresenter >> beInNotRunningMode [
+CMSimulationRunnerPresenter >> beInPauseMode [
 
-	owner beInNotRunningMode
+	owner beInPauseMode
 ]
 
 { #category : 'as yet unclassified' }
@@ -76,12 +76,12 @@ CMSimulationRunnerPresenter >> connectPresenters [
 
 { #category : 'specs' }
 CMSimulationRunnerPresenter >> defaultLayout [
-	
+
 	^ SpBoxLayout newTopToBottom
-		spacing: 10;
-		add: simulationControls height: 90;
-		add: notebook;
-		yourself
+		  spacing: 10;
+		  add: simulationControls expand: false;
+		  add: notebook;
+		  yourself
 ]
 
 { #category : 'as yet unclassified' }
@@ -109,7 +109,6 @@ CMSimulationRunnerPresenter >> hideSettings [
 
 	simulationControls hide.
 	self flag: 'TODO'.
-	"owner hideInitializationSettings."
 	self update.
 	self fitDiagram
 ]
@@ -173,18 +172,14 @@ CMSimulationRunnerPresenter >> initializeNotebookPages [
 CMSimulationRunnerPresenter >> initializePresenters [
 
 	shouldPause := false.
-	
-	simulationControls := self
-		instantiate: CMSimulationControlsPresenter
-		on: translator.
-		
+
+	simulationControls := self instantiate: CMSimulationControlsPresenter on: translator.
+
 	notebook := self newNotebook.
 
 	"A hack to overcome an issue with notebook pages that were added to an empty notebook not signalling the event when they are selected"
-	notebook addPage: (SpNotebookPage
-		title: 'Empty'
-		provider: [ self newLabel ]).
-	
+	notebook addPage: (SpNotebookPage title: 'Empty' provider: [ self newLabel ]).
+
 	"By default this page is disabled. It will be enabled when the simulation: setter is called"
 	self enabled: false
 ]
@@ -217,23 +212,22 @@ CMSimulationRunnerPresenter >> initializeWithSimulation [
 CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 
 	simulationControls beInRunningMode.
-	
+
 	[ [ [ simulation currentTimeStep < simulation finalTimeStep and: [ shouldPause not ] ] whileTrue: [
 		(simulationControls displayEvery min: (simulation finalTimeStep - simulation currentTimeStep))
 			timesRepeat: [ simulation runStep ].
 			
 		[ self updateAfterStep ] onErrorDo: [ :error |
 			"An ugly hack to silence Roassal errors that are caused by parallel execution"
-			error asString = '#intersect: was sent to nil'
-				ifFalse: [ error signal ] ].
+			error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ].
 		
 		(Delay forMilliseconds: simulationControls speedInMilliseconds) wait ]
 	] ensure: [
 		shouldPause := false.
-		simulationControls beInNotRunningMode ].
+		simulationControls beInPauseMode ].
  
 	shouldPause := false.
-	simulationControls beInNotRunningMode ] fork.
+	simulationControls beInPauseMode ] fork.
 ]
 
 { #category : 'accessing - model' }
@@ -253,7 +247,6 @@ CMSimulationRunnerPresenter >> showSettings [
 
 	simulationControls show.
 	self flag: 'TODO'.
-	"owner showInitializationSettings."
 	self update.
 	self fitDiagram
 ]

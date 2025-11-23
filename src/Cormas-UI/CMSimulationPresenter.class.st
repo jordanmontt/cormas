@@ -30,7 +30,7 @@ CMSimulationPresenter class >> forModelClass: aClass translator: aTranslator [
 ]
 
 { #category : 'as yet unclassified' }
-CMSimulationPresenter >> beInNotRunningMode [
+CMSimulationPresenter >> beInPauseMode [
 
 	| presenters |
 	
@@ -45,10 +45,10 @@ CMSimulationPresenter >> beInRunningMode [
 
 	| presenters |
 	
-	presenters := self layout allPresenters select: [ :each | each isKindOf: SpPresenter ].
+"	presenters := self layout allPresenters select: [ :each | each isKindOf: SpPresenter ].
 
 	(presenters copyWithoutAll: { editParametersButton . resetParametersButton })
-		do: [ :each | each enabled: false ].
+		do: [ :each | each enabled: false ]."
 ]
 
 { #category : 'as yet unclassified' }
@@ -144,36 +144,31 @@ CMSimulationPresenter >> initializeModel [
 
 { #category : 'initialization' }
 CMSimulationPresenter >> initializePresenters [
-	
+
 	modelClass initializeParameters.
 
-	modelInitializationSettings := self
-		instantiate: CMSimulationInitializationSettingsPresenter
-		on: translator.
-		
+	modelInitializationSettings := self instantiate: CMSimulationInitializationSettingsPresenter on: translator.
 	modelInitializationSettings modelClass: modelClass.
-	
+
 	editParametersButton := self newButton
 		icon: (self iconNamed: #glamorousEdit);
 		yourself.
-		
+
 	resetParametersButton := self newButton
 		icon: (self iconNamed: #glamorousRestart);
 		yourself.
-		
+
 	initializeButton := self newButton
 		disable;
 		yourself.
 
 	self ensureAllInitSettingsDefined.
-		
+
 	hideInitializationSettingButton := self newButton
 		icon: (self iconNamed: #overlayRemove);
 		yourself.
 
-	simulationRunner := self
-		instantiate: CMSimulationRunnerPresenter
-		on: translator.
+	simulationRunner := self instantiate: CMSimulationRunnerPresenter on: translator
 ]
 
 { #category : 'initialization' }
