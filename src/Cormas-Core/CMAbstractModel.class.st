@@ -40,10 +40,8 @@ Class {
 		'spaceModel',
 		'entities',
 		'cellClass',
-		'agentClasses'
-	],
-	#classVars : [
-		'rulesApplier'
+		'agentClasses',
+		'areAgentsCenteredInCells'
 	],
 	#classInstVars : [
 		'cellClass',
@@ -292,14 +290,6 @@ CMAbstractModel class >> modelName [
 	^ self name
 ]
 
-{ #category : 'instance creation' }
-CMAbstractModel class >> newWithoutParameters [
-
-	^ self basicNew
-		initializeWithoutParameters;
-		yourself
-]
-
 { #category : 'accessing' }
 CMAbstractModel class >> parameters [
 	"Find all class side variables that have getter and setter accessors in model and all entity classes"
@@ -505,16 +495,21 @@ Example: self askRandom: (self theAnimals select:[:f | f energy > 10]) toDo: #re
 ]
 
 { #category : 'accessing - entities' }
-CMAbstractModel >> cellAt: id [
-	"Purpose: returns the cell with id = id"
+CMAbstractModel >> cellAt: index [
 
-	^ self cells at: id
+	^ self spaceModel cellAt: index
 ]
 
 { #category : 'accessing' }
 CMAbstractModel >> cellAt: aRowIndex at: aColumnIndex [ 
 	
 	^ self spaceModel cellAt: aRowIndex at: aColumnIndex
+]
+
+{ #category : 'accessing - entities' }
+CMAbstractModel >> cellAtId: id [
+
+	^ self spaceModel cellAtId: id
 ]
 
 { #category : 'accessing' }
@@ -540,6 +535,28 @@ CMAbstractModel >> centralCell [
 	"Purpose: returns the cell located at the center of the spatial grid. Number of lines and number of columns of the spatial grid have to be odd"
 
 	^ self spaceModel centralCell
+]
+
+{ #category : 'as yet unclassified' }
+CMAbstractModel >> choosePositionForAgent: anAgent inCell: aCell [ 
+
+	| config |
+	config := self spaceModel neighbourhoodConfiguration.
+	
+    ^ areAgentsCenteredInCells
+        ifTrue:  [ config cellCenterFor: aCell ]
+        ifFalse: [ config randomPointInCell: aCell withPadding: (anAgent pov size / 2) using: self randomNumberGenerator ].
+]
+
+{ #category : 'as yet unclassified' }
+CMAbstractModel >> choosePositionForAgentInCell: aCell [ 
+
+	| config |
+	config := self spaceModel neighbourhoodConfiguration.
+	
+    ^ areAgentsCenteredInCells
+        ifTrue:  [ config cellCenterFor: aCell ]
+        ifFalse: [ config randomPointInCell: aCell using: self randomNumberGenerator ].
 ]
 
 { #category : 'random numbers' }
@@ -939,8 +956,15 @@ CMAbstractModel >> initEntities [
 CMAbstractModel >> initialize [
 
 	super initialize.
-	self initializeWithoutParameters.
-	self initializeParameters
+	
+	entities := Dictionary new.
+	
+	self initializeRandomNumberGenerator.
+	self initializeModelClasses.
+	self initializeSpaceModel.
+	self initializeParameters.
+	
+	areAgentsCenteredInCells := true
 ]
 
 { #category : 'accessing' }
@@ -1004,18 +1028,6 @@ CMAbstractModel >> initializeSpaceModel [
 
 ]
 
-{ #category : 'initialization' }
-CMAbstractModel >> initializeWithoutParameters [
-	
-	entities := Dictionary new.
-	
-	self initializeRandomNumberGenerator.
-	self initializeModelClasses.
-	self initializeSpaceModel.
-	
-	self initializeRules
-]
-
 { #category : 'accessing - entities' }
 CMAbstractModel >> lowerLeftCell [
 	"Purpose: returns the cell located at the lower left location of the spatial grid"
@@ -1030,11 +1042,16 @@ CMAbstractModel >> lowerRightCell [
 	^ self spaceModel lowerRightCell
 ]
 
-{ #category : 'initialization' }
-CMAbstractModel >> modelRules [
-	"Overrride me to configure the model rules "
+{ #category : 'as yet unclassified' }
+CMAbstractModel >> makeAgentsCenteredInCells [
 
-	^ {  }
+	areAgentsCenteredInCells := true
+]
+
+{ #category : 'as yet unclassified' }
+CMAbstractModel >> makeAgentsScatteredInCells [
+
+	areAgentsCenteredInCells := false
 ]
 
 { #category : 'utilities - space metrics' }

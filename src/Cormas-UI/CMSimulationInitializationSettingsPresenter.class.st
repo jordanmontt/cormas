@@ -111,7 +111,7 @@ CMSimulationInitializationSettingsPresenter >> finalTimeStep [
 { #category : 'settings' }
 CMSimulationInitializationSettingsPresenter >> finalTimeStep: anInteger [
 
-	finalStepNumberPresenter number: anInteger
+	finalStepNumberPresenter number: anInteger.
 ]
 
 { #category : 'as yet unclassified' }
