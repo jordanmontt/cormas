@@ -8,7 +8,6 @@ Class {
 		'stepButton',
 		'speedDropList',
 		'displayEveryNumberPresenter',
-		'isFirstTimeExecuting',
 		'notebook',
 		'spacePresenter',
 		'dataTable',
@@ -162,13 +161,6 @@ CMSimulationRunnerPresenter >> hideSettings [
 	self fitDiagram
 ]
 
-{ #category : 'initialization' }
-CMSimulationRunnerPresenter >> initialize [
-
-	super initialize.
-	isFirstTimeExecuting := true
-]
-
 { #category : 'public' }
 CMSimulationRunnerPresenter >> initializeCharts [
 
@@ -274,12 +266,7 @@ CMSimulationRunnerPresenter >> initializeRunButtonWithRunAction [
 
 	runButton
 		icon: CMIcons runIcon;
-		action: [
-				isFirstTimeExecuting
-					ifTrue: [
-							self runSimulationUntilEnd.
-							isFirstTimeExecuting := false ]
-					ifFalse: [ self shouldPause: false ] ]
+		action: [ self runSimulationUntilEnd ]
 ]
 
 { #category : 'initialization' }
