@@ -332,9 +332,6 @@ CMSimulationRunnerPresenter >> shouldPause: aBoolean [
 CMSimulationRunnerPresenter >> showSettings [
 
 	self flag: 'TODO'.
-	"simulationControls show."
-	
-	self flag: 'TODO'.
 	"owner showInitializationSettings."
 	self update.
 	self fitDiagram
