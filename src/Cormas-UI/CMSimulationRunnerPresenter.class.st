@@ -4,7 +4,11 @@ Class {
 	#instVars : [
 		'translator',
 		'simulation',
-		'simulationControls',
+		'runButton',
+		'stepButton',
+		'speedDropList',
+		'displayEveryNumberPresenter',
+		'isFirstTimeExecuting',
 		'notebook',
 		'spacePresenter',
 		'dataTable',
@@ -58,17 +62,23 @@ CMSimulationRunnerPresenter class >> openForSimulation: aSimulation withTranslat
 { #category : 'as yet unclassified' }
 CMSimulationRunnerPresenter >> beInPauseMode [
 
-	owner beInPauseMode
+	self initializeRunButtonWithRunAction.
+	stepButton enabled: true
 ]
 
 { #category : 'as yet unclassified' }
 CMSimulationRunnerPresenter >> beInRunningMode [
 
-	owner beInRunningMode
+	self initializeRunButtonWithPauseAction.
+	stepButton enabled: false
 ]
 
 { #category : 'initialization' }
 CMSimulationRunnerPresenter >> connectPresenters [
+
+	stepButton action: [ self stepSimulation ].
+
+	self initializeRunButtonWithRunAction.
 	
 	notebook whenSelectedPageChangedDo: [ :page |
 		self updateSelectedNotebookPage ].
@@ -77,11 +87,47 @@ CMSimulationRunnerPresenter >> connectPresenters [
 { #category : 'specs' }
 CMSimulationRunnerPresenter >> defaultLayout [
 
+	| simulationControlsLayout |
+	
+	simulationControlsLayout := SpBoxLayout newLeftToRight
+		  spacing: 5;
+		  add: (SpBoxLayout newTopToBottom
+				   spacing: 3;
+				   add: translator tStepButtonLabel expand: false;
+				   add: stepButton expand: false;
+				   yourself)
+		  expand: false;
+		  add: (SpBoxLayout newTopToBottom
+				   spacing: 3;
+				   add: translator tRun expand: false;
+				   add: runButton expand: false;
+				   yourself)
+		  expand: false;
+		  add: SpNullPresenter new;
+		  add: (SpBoxLayout newTopToBottom
+				   spacing: 3;
+				   add: translator tSpeedLabel expand: false;
+				   add: speedDropList expand: false;
+				   yourself)
+		  expand: false;
+		  add: (SpBoxLayout newTopToBottom
+				   spacing: 3;
+				   add: translator tDisplayEveryLabel expand: false;
+				   add: displayEveryNumberPresenter expand: false;
+				   yourself)
+		  expand: false;
+		  yourself.
+
 	^ SpBoxLayout newTopToBottom
 		  spacing: 10;
-		  add: simulationControls expand: false;
+		  add: simulationControlsLayout expand: false;
 		  add: notebook;
 		  yourself
+]
+
+{ #category : 'examples' }
+CMSimulationRunnerPresenter >> example [
+	<script: 'self example'>
 ]
 
 { #category : 'as yet unclassified' }
@@ -107,10 +153,20 @@ CMSimulationRunnerPresenter >> hasSimulationData [
 { #category : 'as yet unclassified' }
 CMSimulationRunnerPresenter >> hideSettings [
 
-	simulationControls hide.
 	self flag: 'TODO'.
+	"simulationControls hide."
+	
+	self flag: 'TODO'.
+	"owner hideInitializationSettings."
 	self update.
 	self fitDiagram
+]
+
+{ #category : 'initialization' }
+CMSimulationRunnerPresenter >> initialize [
+
+	super initialize.
+	isFirstTimeExecuting := true
 ]
 
 { #category : 'public' }
@@ -173,7 +229,28 @@ CMSimulationRunnerPresenter >> initializePresenters [
 
 	shouldPause := false.
 
-	simulationControls := self instantiate: CMSimulationControlsPresenter on: translator.
+	runButton := self newButton
+		             help: translator tRunButtonHelp;
+		             yourself.
+
+	stepButton := self newButton
+		              icon: CMIcons stepIcon;
+		              help: translator tStepButtonHelp;
+		              yourself.
+
+	speedDropList := self newDropList
+		                 help: translator tSpeedHelp;
+		                 items: self speedDropListItems;
+		                 selectItem: translator tSpeedNormal;
+		                 yourself.
+
+	displayEveryNumberPresenter := self newNumberInput
+		                beInteger;
+		                minimum: 1;
+		                number: 1;
+		                yourself.
+
+	self beInPauseMode.
 
 	notebook := self newNotebook.
 
@@ -182,6 +259,27 @@ CMSimulationRunnerPresenter >> initializePresenters [
 
 	"By default this page is disabled. It will be enabled when the simulation: setter is called"
 	self enabled: false
+]
+
+{ #category : 'initialization' }
+CMSimulationRunnerPresenter >> initializeRunButtonWithPauseAction [
+
+	runButton
+		icon: CMIcons pauseIcon;
+		action: [ self shouldPause: true ]
+]
+
+{ #category : 'initialization' }
+CMSimulationRunnerPresenter >> initializeRunButtonWithRunAction [
+
+	runButton
+		icon: CMIcons runIcon;
+		action: [
+				isFirstTimeExecuting
+					ifTrue: [
+							self runSimulationUntilEnd.
+							isFirstTimeExecuting := false ]
+					ifFalse: [ self shouldPause: false ] ]
 ]
 
 { #category : 'initialization' }
@@ -211,20 +309,24 @@ CMSimulationRunnerPresenter >> initializeWithSimulation [
 { #category : 'actions' }
 CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 
-	simulationControls beInRunningMode.
-
+	self beInRunningMode.
+	
 	[ [ [ simulation currentTimeStep < simulation finalTimeStep and: [ shouldPause not ] ] whileTrue: [
-		(simulationControls displayEvery min: (simulation finalTimeStep - simulation currentTimeStep))
+		(displayEveryNumberPresenter number min: (simulation finalTimeStep - simulation currentTimeStep))
 			timesRepeat: [ simulation runStep ].
 			
 		[ self updateAfterStep ] onErrorDo: [ :error |
 			"An ugly hack to silence Roassal errors that are caused by parallel execution"
-			error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ].
+			error asString = '#intersect: was sent to nil'
+				ifFalse: [ error signal ] ].
 		
-		(Delay forMilliseconds: simulationControls speedInMilliseconds) wait ]
+		(Delay forMilliseconds: self speedInMilliseconds) wait ]
 	] ensure: [
 		shouldPause := false.
-		simulationControls beInPauseMode ] ] fork.
+		self beInPauseMode ].
+ 
+	shouldPause := false.
+	self beInPauseMode ] fork.
 ]
 
 { #category : 'accessing - model' }
@@ -236,17 +338,17 @@ CMSimulationRunnerPresenter >> setModelBeforeInitialization: aTranslator [
 { #category : 'accessing' }
 CMSimulationRunnerPresenter >> shouldPause: aBoolean [
 
-	aBoolean
-		ifTrue: [ simulationControls beInPauseMode ]
-		ifFalse: [ simulationControls beInRunningMode ].
 	shouldPause := aBoolean
 ]
 
 { #category : 'as yet unclassified' }
 CMSimulationRunnerPresenter >> showSettings [
 
-	simulationControls show.
 	self flag: 'TODO'.
+	"simulationControls show."
+	
+	self flag: 'TODO'.
+	"owner showInitializationSettings."
 	self update.
 	self fitDiagram
 ]
@@ -277,6 +379,25 @@ CMSimulationRunnerPresenter >> speedDropListItems [
 		  translator tSpeed2xFaster.
 		  translator tSpeed5xFaster.
 		  translator tSpeed10xFaster }
+]
+
+{ #category : 'as yet unclassified' }
+CMSimulationRunnerPresenter >> speedInMilliseconds [
+
+	| normalSpeed mapping |
+	normalSpeed := 200.
+
+	mapping := {
+		translator tSpeed10xSlower -> (normalSpeed * 10) .
+		translator tSpeed5xSlower -> (normalSpeed * 5) .
+		translator tSpeed2xSlower -> (normalSpeed * 2) .
+		translator tSpeedNormal -> normalSpeed .
+		translator tSpeed2xFaster -> (normalSpeed / 2) .
+		translator tSpeed5xFaster -> (normalSpeed / 5) .
+		translator tSpeed10xFaster -> (normalSpeed / 10)
+	} asDictionary.
+	
+	^ mapping at: speedDropList selectedItem
 ]
 
 { #category : 'actions' }
