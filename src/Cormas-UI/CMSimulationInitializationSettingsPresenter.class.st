@@ -3,13 +3,13 @@ Class {
 	#superclass : 'SpPresenter',
 	#instVars : [
 		'translator',
-		'fixRandomSeedCheckbox',
 		'randomSeedInput',
 		'releaseRandomSeedCheckbox',
 		'initSelectorDropList',
 		'controlSelectorDropList',
 		'modelClass',
-		'whenChangedBlock'
+		'whenChangedBlock',
+		'finalStepNumberPresenter'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -34,11 +34,6 @@ CMSimulationInitializationSettingsPresenter class >> forTranslator: aTranslator 
 CMSimulationInitializationSettingsPresenter >> connectPresenters [
 
 	whenChangedBlock := [ "do nothing" ].
-
-	fixRandomSeedCheckbox
-		whenChangedDo: [ :boolean | whenChangedBlock value ];
-		whenActivatedDo: [ self enableRandomSeedPresenters ];
-		whenDeactivatedDo: [ self disableRandomSeedPresenters ].
 		
 	randomSeedInput whenNumberChangedDo: [ :number | whenChangedBlock value ].
 	releaseRandomSeedCheckbox whenChangedDo: [ :boolean | whenChangedBlock value ].
@@ -56,29 +51,34 @@ CMSimulationInitializationSettingsPresenter >> controlSelector [
 { #category : 'layout' }
 CMSimulationInitializationSettingsPresenter >> defaultLayout [
 
-	| labelHeight buttonHeight numberInputWidth |
-	labelHeight := self class labelHeight.
-	buttonHeight := self class buttonHeight.
-	numberInputWidth := 90.
- 
+	| gridLayout |
+	gridLayout := SpGridLayout new.
+
+	gridLayout
+		borderWidth: 0;
+		beColumnHomogeneous;
+		column: 2 expand: true;
+		build: [ :builder |
+				builder
+					add: translator tFinalStep;
+					add: finalStepNumberPresenter;
+					nextRow;
+					add: translator tRandomSeed;
+					add: randomSeedInput;
+					nextRow;
+					add: translator tInitMethod;
+					nextRow;
+					add: releaseRandomSeedCheckbox;
+					nextRow;
+					add: initSelectorDropList span: 2 @ 1;
+					nextRow;
+					add: translator tControlMethod;
+					nextRow;
+					add: controlSelectorDropList span: 2 @ 1 ].
+
 	^ SpBoxLayout newTopToBottom
 		  spacing: 12;
-		  add: (SpBoxLayout newLeftToRight
-				   add: fixRandomSeedCheckbox;
-				   add: randomSeedInput width: numberInputWidth;
-				   yourself)
-		  height: 25;
-		  add: (SpBoxLayout newTopToBottom
-				   add: translator tInitMethod height: labelHeight;
-				   add: initSelectorDropList height: buttonHeight;
-				   yourself)
-		  height: labelHeight + buttonHeight;
-		  add: releaseRandomSeedCheckbox height: 25;
-		  add: (SpBoxLayout newTopToBottom
-				   add: translator tControlMethod height: labelHeight;
-				   add: controlSelectorDropList height: buttonHeight;
-				   yourself)
-		  height: labelHeight + buttonHeight;
+		  add: gridLayout expand: true;
 		  yourself
 ]
 
@@ -100,6 +100,20 @@ CMSimulationInitializationSettingsPresenter >> enableRandomSeedPresenters [
 	releaseRandomSeedCheckbox enable.
 ]
 
+{ #category : 'settings' }
+CMSimulationInitializationSettingsPresenter >> finalTimeStep [
+
+	^ finalStepNumberPresenter number = 0
+		  ifTrue: [ nil ]
+		  ifFalse: [ finalStepNumberPresenter number ]
+]
+
+{ #category : 'settings' }
+CMSimulationInitializationSettingsPresenter >> finalTimeStep: anInteger [
+
+	finalStepNumberPresenter number: anInteger.
+]
+
 { #category : 'as yet unclassified' }
 CMSimulationInitializationSettingsPresenter >> initSelector [
 
@@ -109,10 +123,12 @@ CMSimulationInitializationSettingsPresenter >> initSelector [
 { #category : 'initialization' }
 CMSimulationInitializationSettingsPresenter >> initializePresenters [
 	
-	fixRandomSeedCheckbox := self newCheckBox
-		label: translator tFixRandomSeed;
+	finalStepNumberPresenter := self newNumberInput
+		beInteger;
+		climbRate: 50;
+		minimum: 0;
 		yourself.
-		
+
 	randomSeedInput := self newNumberInput.
 	
 	releaseRandomSeedCheckbox := self newCheckBox
@@ -137,12 +153,6 @@ CMSimulationInitializationSettingsPresenter >> isDefined [
 	"Answer true if simulation is fully defined and can be initialized"
 	
 	^ initSelectorDropList selectedItem isNotNil
-]
-
-{ #category : 'settings' }
-CMSimulationInitializationSettingsPresenter >> isFixRandomSeed [
-
-	^ fixRandomSeedCheckbox state
 ]
 
 { #category : 'settings' }
