@@ -37,6 +37,7 @@ Class {
 	#traits : 'TCMRandom',
 	#classTraits : 'TCMRandom classTrait',
 	#instVars : [
+		'currentTimeStep',
 		'spaceModel',
 		'entities',
 		'cellClass',
@@ -814,7 +815,8 @@ CMAbstractModel >> createN: aNumber randomlyLocatedEntitiesFrom: aCollectionOfCl
 
 { #category : 'accessing' }
 CMAbstractModel >> currentTimeStep [
-"Returns the current time step (Integer) of the simulation"
+	"This must be a property of model, not simulation, because it is very common that the behavior of agents depends on this number. For example: collect harvest after every 30 steps"
+	^ currentTimeStep
 ]
 
 { #category : 'utilities - space metrics' }
@@ -899,6 +901,12 @@ CMAbstractModel >> getAttributesType: attributes fromInstances: instanceCollecti
 	^dicoAttConv
 ]
 
+{ #category : 'accessing' }
+CMAbstractModel >> incrementCurrentTimeStep [
+
+	currentTimeStep := currentTimeStep + 1
+]
+
 { #category : 'init-release entities' }
 CMAbstractModel >> initEntities [
 	"Initialize all the Entity classes of the model"
@@ -915,6 +923,7 @@ CMAbstractModel >> initialize [
 
 	super initialize.
 	
+	currentTimeStep := 0.
 	entities := Dictionary new.
 	
 	self initializeRandomNumberGenerator.

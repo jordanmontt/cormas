@@ -5,7 +5,6 @@ Class {
 		'modelClass',
 		'randomSeed',
 		'cormasModel',
-		'currentTimeStep',
 		'stopCondition',
 		'data',
 		'activeInitSelector',
@@ -60,7 +59,7 @@ CMSimulation >> cormasModel [
 { #category : 'accessing' }
 CMSimulation >> currentTimeStep [
 
-	^ currentTimeStep 
+	^ cormasModel currentTimeStep 
 ]
 
 { #category : 'accessing' }
@@ -81,7 +80,7 @@ CMSimulation >> initialize [
 	super initialize.
 	
 	"Be careful when modifying the stop condition because it can make the simulation (including the tests) run endlesly"
-	stopCondition := [ :model | currentTimeStep >= self class defaultFinalTimeStep ].
+	stopCondition := [ :model | model currentTimeStep >= self class defaultFinalTimeStep ].
 	
 	probes := OrderedCollection new.
 	data := OrderedCollection new.
@@ -109,7 +108,6 @@ Reset the currentTimeStep and the data. Set the randomSeed"
 	
 	self initializeProbes.
 
-	currentTimeStep := 0.
 	data := OrderedCollection new.
 
 "	self initializeModel."
@@ -199,10 +197,12 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 { #category : 'running' }
 CMSimulation >> runStep [
 	
-	currentTimeStep := currentTimeStep + 1.
+	cormasModel incrementCurrentTimeStep.
 	
+	self flag: 'TODO'.
+	"TODO: Discuss this. We can either keep the currentTimeStep as attribute of a model, but then there is no need to pass it as parameter to the step method. Or we can move it to the simulation class and then pass it as parameter (perhaps, it would malke sense to always pass it as parameter to the step method)"
 	activeControlSelector last = $:
-		ifTrue: [ cormasModel perform: activeControlSelector with: currentTimeStep ]
+		ifTrue: [ cormasModel perform: activeControlSelector with: cormasModel currentTimeStep ]
 		ifFalse: [ cormasModel perform: activeControlSelector ].
 		
 	cormasModel removeDestroyedEntities.
@@ -247,7 +247,7 @@ CMSimulation >> shouldReleaseRandomSeedAfterInitialization: aBoolean [
 { #category : 'as yet unclassified' }
 CMSimulation >> stopAfterStep: aNumber [
 	"A syntactic sugar to provide a stop condition that will stop a simulation after a given number of steps"
-	self stopWhen: [ :model | self currentTimeStep >= aNumber ]
+	self stopWhen: [ :model | model currentTimeStep >= aNumber ]
 ]
 
 { #category : 'as yet unclassified' }

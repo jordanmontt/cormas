@@ -167,7 +167,7 @@ CMSimulationTest >> testStopWhen [
 	"Stop when cell 1@1 has a goat on it or when the simulation runs for 10000 steps (to ensure that it doesn't run endlessly if something goes wrong)"
 	simulation stopWhen: [ :model |
 		(model cells first hasOccupantsOfClass: CMMockGoat)
-			or: [ simulation currentTimeStep >= 10000 ] ].
+			or: [ model currentTimeStep >= 10000 ] ].
 		
 	simulation runAllSteps.
 	
