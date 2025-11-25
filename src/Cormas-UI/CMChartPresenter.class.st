@@ -72,7 +72,7 @@ CMChartPresenter >> drawChart [
 	| chartBuilder size x y |
 	
 	chartBuilder := CMR3ChartBuilder new
-		maxChartValueX: simulation finalTimeStep + 1;
+		maxChartValueX: simulation data size;
 		yourself.
 		
 	(isProbeVisibleDictionary values noneSatisfy: #yourself)
