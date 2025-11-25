@@ -15,7 +15,7 @@ Class {
 		'spacePage',
 		'dataPage',
 		'chartsPage',
-		'shouldPause'
+		'simulationProcess'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -161,6 +161,24 @@ CMSimulationRunnerPresenter >> hideSettings [
 	self fitDiagram
 ]
 
+{ #category : 'initialization' }
+CMSimulationRunnerPresenter >> initialize [
+
+	super initialize.
+		
+	simulationProcess := [ [
+		[ false ] whileFalse: [
+			displayEveryNumberPresenter number timesRepeat: [ simulation runStep ].
+			
+			[ self updateAfterStep ] onErrorDo: [ :error |
+				"An ugly hack to silence Roassal errors that are caused by parallel execution"
+				error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ].
+		
+			(Delay forMilliseconds: self speedInMilliseconds) wait ] ]
+		ensure: [ self beInPauseMode ] ].
+	simulationProcess := simulationProcess newProcess
+]
+
 { #category : 'public' }
 CMSimulationRunnerPresenter >> initializeCharts [
 
@@ -219,8 +237,6 @@ CMSimulationRunnerPresenter >> initializeNotebookPages [
 { #category : 'initialization' }
 CMSimulationRunnerPresenter >> initializePresenters [
 
-	shouldPause := false.
-
 	runButton := self newButton
 		             help: translator tRunButtonHelp;
 		             yourself.
@@ -258,7 +274,7 @@ CMSimulationRunnerPresenter >> initializeRunButtonWithPauseAction [
 
 	runButton
 		icon: CMIcons pauseIcon;
-		action: [ self shouldPause: true ]
+		action: [ self pauseSimulation ]
 ]
 
 { #category : 'initialization' }
@@ -293,6 +309,13 @@ CMSimulationRunnerPresenter >> initializeWithSimulation [
 	self initializeNotebookPages.
 ]
 
+{ #category : 'initialization' }
+CMSimulationRunnerPresenter >> pauseSimulation [
+
+	self beInPauseMode.
+	simulationProcess suspend
+]
+
 { #category : 'actions' }
 CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 
@@ -317,12 +340,6 @@ CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 CMSimulationRunnerPresenter >> setModelBeforeInitialization: aTranslator [
 
 	translator := aTranslator
-]
-
-{ #category : 'accessing' }
-CMSimulationRunnerPresenter >> shouldPause: aBoolean [
-
-	shouldPause := aBoolean
 ]
 
 { #category : 'as yet unclassified' }
