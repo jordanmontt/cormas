@@ -139,7 +139,7 @@ BaselineOfCormas >> specForPackages: spec [
 		with: [ spec requires: #('Cormas-Core' 'RoassalExporters') ];
 		
 		package: 'Cormas-UI-Translator';
-		package: 'Cormas-UI-Commands' with: [ spec requires: #( 'Cormas-UI' 'Cormas-UI-Translator' ) ];
+		package: 'Cormas-UI-Commands';
 		package: 'Cormas-UI-Tilesets';
 		
 		package: 'Cormas-UI'

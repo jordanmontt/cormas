@@ -43,14 +43,10 @@ CMLoadedModelPreviewPresenter >> cormasModelClass [
 CMLoadedModelPreviewPresenter >> defaultLayout [
 
 	| buttonsLayout |
-	buttonsLayout := SpBoxLayout newLeftToRight.
-	
-	self commands
-		select: #isBigButton
-		thenDo: [ :command |
-			buttonsLayout add: command button ].
-		
-	buttonsLayout add: toolbar.
+	buttonsLayout := SpBoxLayout newLeftToRight
+		add: runSimulationButton;
+		add: toolbar;
+		yourself.
 
 	^ SpBoxLayout newTopToBottom
 		spacing: 10;
@@ -72,8 +68,16 @@ CMLoadedModelPreviewPresenter >> initializePresenters [
 	
 	modelPreview := self instantiate: CMModelPreviewPresenter on: cormasModelClass.
 
-	runSimulationCommand := CMModelOpenerSimulateCommand forOwner: self translator: translator.
-	runSimulationButton := runSimulationCommand button.
+	runSimulationButton := self newButton
+		label: 'Simulate';
+		icon: CMIcons runIcon;
+		action: [
+			| presenter |
+			presenter := CMSimulationPresenter
+				forModelClass: cormasModelClass
+				translator: translator.
+			presenter open.
+			presenter window centered ].
 	
 	self initializeToolbar
 ]
@@ -83,10 +87,8 @@ CMLoadedModelPreviewPresenter >> initializeToolbar [
 	
 	toolbar := self newToolbar.
 	toolbar beIcons.
-	
-	(self commands reject: #isBigButton) do: [ :command |
-		command isAvailable ifTrue: [
-			toolbar addItemRight: command toolbarButton ] ]
+	self commands do: [ :command |
+		command isAvailable ifTrue: [ toolbar addItemRight: command toolbarButton ] ]
 ]
 
 { #category : 'accessing - model' }
