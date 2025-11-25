@@ -59,12 +59,6 @@ CMSimulation >> cormasModel [
 ]
 
 { #category : 'accessing' }
-CMSimulation >> cormasModel: aModel [
-	
-	cormasModel :=  aModel
-]
-
-{ #category : 'accessing' }
 CMSimulation >> currentTimeStep [
 
 	^ currentTimeStep 
