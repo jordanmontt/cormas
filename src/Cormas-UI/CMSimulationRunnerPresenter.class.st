@@ -416,12 +416,6 @@ CMSimulationRunnerPresenter >> updateDataTable [
 	dataTable showData: simulation data
 ]
 
-{ #category : 'as yet unclassified' }
-CMSimulationRunnerPresenter >> updateFinalTimeStep: aNumber [
-
-	simulation finalTimeStep: aNumber
-]
-
 { #category : 'update presenters' }
 CMSimulationRunnerPresenter >> updateSelectedNotebookPage [
 	"Only update the page that is currently being displayed. This makes execution much faster because other pages (chart, space, data table) will not be updated when they are not displayed"

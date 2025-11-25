@@ -3,12 +3,10 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'modelClass',
+		'randomSeed',
 		'cormasModel',
-		'randomNumberGenerator',
-		'currentRunNumber',
-		'currentTimeStep',
+		'stopCondition',
 		'data',
-		'finalTimeStep',
 		'activeInitSelector',
 		'activeControlSelector',
 		'probes',
@@ -30,7 +28,7 @@ CMSimulation class >> defaultFinalTimeStep [
 CMSimulation class >> for: aModelClass [
 
 	^ self new
-		initializeModelClass: aModelClass;
+		modelClass: aModelClass;
 		yourself
 ]
 
@@ -59,46 +57,15 @@ CMSimulation >> cormasModel [
 ]
 
 { #category : 'accessing' }
-CMSimulation >> cormasModel: aModel [
-	
-	cormasModel :=  aModel
-]
-
-{ #category : 'accessing' }
 CMSimulation >> currentTimeStep [
 
-	^ currentTimeStep 
+	^ cormasModel currentTimeStep 
 ]
 
 { #category : 'accessing' }
 CMSimulation >> data [
 
 	^ data
-]
-
-{ #category : 'settings' }
-CMSimulation >> finalTimeStep [
-
-	^ finalTimeStep
-]
-
-{ #category : 'settings' }
-CMSimulation >> finalTimeStep: anInteger [
-
-	finalTimeStep := anInteger
-	
-]
-
-{ #category : 'time step' }
-CMSimulation >> finishSimulation [
-
-	currentTimeStep := self finalTimeStep
-]
-
-{ #category : 'testing' }
-CMSimulation >> hasEnded [
-	
-	^ self finalTimeStep <= self currentTimeStep
 ]
 
 { #category : 'settings' }
@@ -112,20 +79,14 @@ CMSimulation >> initialize [
 
 	super initialize.
 	
-	finalTimeStep := self class defaultFinalTimeStep.
+	"Be careful when modifying the stop condition because it can make the simulation (including the tests) run endlesly"
+	stopCondition := [ :model | model currentTimeStep >= self class defaultFinalTimeStep ].
 	
 	probes := OrderedCollection new.
 	data := OrderedCollection new.
 	initialParameterValues := Dictionary new.
 	
 	shouldReleaseRandomSeedAfterInitialization := false
-]
-
-{ #category : 'initialization' }
-CMSimulation >> initializeModelClass: aClass [
-
-	cormasModel := aClass new.
-	self initializeProbes
 ]
 
 { #category : 'initialization' }
@@ -140,7 +101,13 @@ CMSimulation >> initializeSimulation [
 "Purpose: initialize one simulation by performing #activeInitSelector.
 Reset the currentTimeStep and the data. Set the randomSeed"
 
-	currentTimeStep := 0.
+	cormasModel := modelClass new.
+	
+	randomSeed ifNotNil: [
+		cormasModel randomSeed: randomSeed ].
+	
+	self initializeProbes.
+
 	data := OrderedCollection new.
 
 "	self initializeModel."
@@ -155,6 +122,12 @@ Reset the currentTimeStep and the data. Set the randomSeed"
 		cormasModel randomSeed: cormasModel chooseRandomSeedAtRandom ].
 ]
 
+{ #category : 'initialization' }
+CMSimulation >> modelClass: aClass [
+
+	modelClass := aClass
+]
+
 { #category : 'accessing' }
 CMSimulation >> probes [
 
@@ -164,7 +137,7 @@ CMSimulation >> probes [
 { #category : 'settings' }
 CMSimulation >> randomSeed: aNumber [
 
-	cormasModel randomSeed: aNumber
+	randomSeed := aNumber
 ]
 
 { #category : 'data' }
@@ -184,17 +157,15 @@ CMSimulation >> runAllSteps [
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEach: aNumberOfSteps do: aBlock [
 
-	[ currentTimeStep < finalTimeStep ] whileTrue: [
-		(aNumberOfSteps min: (finalTimeStep - currentTimeStep))
-			timesRepeat: [ self runStep ].
-			
-		aBlock value ]
+	[ stopCondition value: cormasModel ] whileFalse: [
+		self runStep.
+		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ] ]
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEachDo: aBlock [
 
-	[ currentTimeStep < finalTimeStep ] whileTrue: [
+	[ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		aBlock value ]
 ]
@@ -208,18 +179,16 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds [
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock [
 
-	[ [ currentTimeStep < finalTimeStep ] whileTrue: [
-		(aNumberOfSteps min: (finalTimeStep - currentTimeStep))
-			timesRepeat: [ self runStep ].
-			
-		aBlock value.
+	[ [ stopCondition value: cormasModel ] whileFalse: [
+		self runStep.
+		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ].
 		(Delay forMilliseconds: milliseconds) wait ] ] fork.
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 
-	[ [ currentTimeStep < finalTimeStep ] whileTrue: [
+	[ [ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		aBlock value.
 		(Delay forMilliseconds: milliseconds) wait ] ] fork.
@@ -228,10 +197,12 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 { #category : 'running' }
 CMSimulation >> runStep [
 	
-	currentTimeStep := currentTimeStep + 1.
+	cormasModel incrementCurrentTimeStep.
 	
+	self flag: 'TODO'.
+	"TODO: Discuss this. We can either keep the currentTimeStep as attribute of a model, but then there is no need to pass it as parameter to the step method. Or we can move it to the simulation class and then pass it as parameter (perhaps, it would malke sense to always pass it as parameter to the step method)"
 	activeControlSelector last = $:
-		ifTrue: [ cormasModel perform: activeControlSelector with: currentTimeStep ]
+		ifTrue: [ cormasModel perform: activeControlSelector with: cormasModel currentTimeStep ]
 		ifFalse: [ cormasModel perform: activeControlSelector ].
 		
 	cormasModel removeDestroyedEntities.
@@ -271,4 +242,18 @@ CMSimulation >> setInitialParametersFor: aCollectionOfParameters [
 CMSimulation >> shouldReleaseRandomSeedAfterInitialization: aBoolean [
 
 	shouldReleaseRandomSeedAfterInitialization := aBoolean
+]
+
+{ #category : 'as yet unclassified' }
+CMSimulation >> stopAfterStep: aNumber [
+	"A syntactic sugar to provide a stop condition that will stop a simulation after a given number of steps"
+	self stopWhen: [ :model | model currentTimeStep >= aNumber ]
+]
+
+{ #category : 'as yet unclassified' }
+CMSimulation >> stopWhen: aBlock [
+	"Provede a one-argument block with a stop condition. The argument is a cormasModel. Be careful when modifying the stop condition because it can make the simulation run endlesly.
+	
+	Example: self stopWhen: [ :model | model totalBiomass > 100 ]"
+	stopCondition := aBlock
 ]
