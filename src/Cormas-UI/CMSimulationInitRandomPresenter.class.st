@@ -67,10 +67,12 @@ CMSimulationInitRandomPresenter >> connectPresenters [
 CMSimulationInitRandomPresenter >> defaultLayout [
 
 	^ SpBoxLayout newTopToBottom
-		  spacing: 3;
 		  add: translator tGenerator expand: false;
+		  add: (self instantiate: SpNullPresenter) expand: false;
 		  add: randomSeedGeneratorDroplist expand: false;
+		  add: (self instantiate: SpNullPresenter) expand: false;
 		  add: translator tRandomSeed expand: false;
+		  add: (self instantiate: SpNullPresenter) expand: false;
 		  add: randomSeedInput expand: false;
 		  add: fixRandomSeedCheckbox expand: false;
 		  add: releaseRandomSeedCheckbox expand: false;
