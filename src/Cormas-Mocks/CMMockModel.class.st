@@ -229,6 +229,13 @@ CMMockModel >> invertedCellMatrix [
 	^ self cellMatrix collect: [ :each | 1 - each ].
 ]
 
+{ #category : 'testing' }
+CMMockModel >> isGoatInFirstCell [
+
+	<boolean>
+	^ self cells first hasOccupantsOfClass: CMMockGoat
+]
+
 { #category : 'probes' }
 CMMockModel >> numberOfAliveCells [
 

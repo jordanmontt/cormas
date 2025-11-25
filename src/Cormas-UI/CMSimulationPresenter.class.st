@@ -184,3 +184,15 @@ CMSimulationPresenter >> settingsSimulationInitializer [
 				self initializeSimulationInit: initSelector control: controlSelector ];
 			yourself ]
 ]
+
+{ #category : 'as yet unclassified' }
+CMSimulationPresenter >> settingsStopCondition [
+	<fancyNotebookPage>
+	
+	^ SpNotebookPage
+		title: 'Stop condition'
+		icon: (self iconNamed: #accept)
+		provider: [ self
+			instantiate: CMStopConditionPresenter
+			on: { modelClass . translator } ]
+]
