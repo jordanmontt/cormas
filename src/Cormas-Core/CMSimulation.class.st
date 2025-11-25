@@ -88,7 +88,7 @@ CMSimulation >> initialize [
 	super initialize.
 	
 	"Be careful when modifying the stop condition because it can make the simulation (including the tests) run endlesly"
-	stopCondition := [ currentTimeStep >= self class defaultFinalTimeStep ].
+	stopCondition := [ :model | currentTimeStep >= self class defaultFinalTimeStep ].
 	
 	probes := OrderedCollection new.
 	data := OrderedCollection new.
@@ -160,7 +160,7 @@ CMSimulation >> runAllSteps [
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEach: aNumberOfSteps do: aBlock [
 
-	stopCondition whileFalse: [
+	[ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ] ]
 ]
@@ -168,7 +168,7 @@ CMSimulation >> runAllStepsAfterEach: aNumberOfSteps do: aBlock [
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEachDo: aBlock [
 
-	stopCondition whileFalse: [
+	[ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		aBlock value ]
 ]
@@ -182,7 +182,7 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds [
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock [
 
-	[ stopCondition whileFalse: [
+	[ [ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ].
 		(Delay forMilliseconds: milliseconds) wait ] ] fork.
@@ -191,7 +191,7 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEach: aNumberOfSteps
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 
-	[ stopCondition whileFalse: [
+	[ [ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		aBlock value.
 		(Delay forMilliseconds: milliseconds) wait ] ] fork.
@@ -248,11 +248,13 @@ CMSimulation >> shouldReleaseRandomSeedAfterInitialization: aBoolean [
 { #category : 'as yet unclassified' }
 CMSimulation >> stopAfterStep: aNumber [
 	"A syntactic sugar to provide a stop condition that will stop a simulation after a given number of steps"
-	self stopWhen: [ self currentTimeStep >= aNumber ]
+	self stopWhen: [ :model | self currentTimeStep >= aNumber ]
 ]
 
 { #category : 'as yet unclassified' }
 CMSimulation >> stopWhen: aBlock [
-	"Be careful when modifying the stop condition because it can make the simulation run endlesly"
+	"Provede a one-argument block with a stop condition. The argument is a cormasModel. Be careful when modifying the stop condition because it can make the simulation run endlesly.
+	
+	Example: self stopWhen: [ :model | model totalBiomass > 100 ]"
 	stopCondition := aBlock
 ]

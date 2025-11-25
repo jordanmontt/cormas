@@ -150,3 +150,33 @@ CMSimulationTest >> testRunStep [
 	self assert: agent1 coordinates equals: 2@2.
 	self assert: agent2 coordinates equals: 4@2.
 ]
+
+{ #category : 'tests' }
+CMSimulationTest >> testStopAfterStep [
+
+	simulation stopAfterStep: 7.
+
+	self assert: simulation currentTimeStep equals: 0.
+	simulation runAllSteps.
+	self assert: simulation currentTimeStep equals: 7.
+]
+
+{ #category : 'tests' }
+CMSimulationTest >> testStopWhen [
+
+	"Stop when cell 1@1 has a goat on it or when the simulation runs for 10000 steps (to ensure that it doesn't run endlessly if something goes wrong)"
+	simulation stopWhen: [ :model |
+		(model cells first hasOccupantsOfClass: CMMockGoat)
+			or: [ simulation currentTimeStep >= 10000 ] ].
+		
+	simulation runAllSteps.
+	
+	"Normally, at least one step of the simulation should be executed. Otherwise this is not a very good test"
+	self assert: simulation currentTimeStep > 0.
+	
+	"Normally, we should stop before 10000 steps"
+	self assert: simulation currentTimeStep < 10000.
+
+	"Was the condition satisfied?"
+	self assert: (simulation cormasModel cells first hasOccupantsOfClass: CMMockGoat).
+]
