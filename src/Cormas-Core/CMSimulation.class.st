@@ -89,18 +89,6 @@ CMSimulation >> finalTimeStep: anInteger [
 	
 ]
 
-{ #category : 'time step' }
-CMSimulation >> finishSimulation [
-
-	currentTimeStep := self finalTimeStep
-]
-
-{ #category : 'testing' }
-CMSimulation >> hasEnded [
-	
-	^ self finalTimeStep <= self currentTimeStep
-]
-
 { #category : 'settings' }
 CMSimulation >> initialParameterValues [
 
