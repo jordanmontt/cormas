@@ -42,6 +42,12 @@ CMSimulationTest >> testData [
 ]
 
 { #category : 'tests' }
+CMSimulationTest >> testDefaultFinalTimeStep [
+
+	self assert: simulation class defaultFinalTimeStep equals: 100
+]
+
+{ #category : 'tests' }
 CMSimulationTest >> testProbes [
 
 	| expectedProbes |
@@ -61,6 +67,68 @@ CMSimulationTest >> testProbes [
 	}.
 
 	self assertCollection: simulation probes hasSameElements: expectedProbes.
+]
+
+{ #category : 'tests' }
+CMSimulationTest >> testRunAllSteps [
+
+	self assert: simulation currentTimeStep equals: 0.
+	simulation runAllSteps.
+	self assert: simulation currentTimeStep equals: simulation class defaultFinalTimeStep.
+]
+
+{ #category : 'tests' }
+CMSimulationTest >> testRunAllStepsAfterEachDo [
+
+	| counter |
+	counter := 0.
+
+	simulation runAllStepsAfterEachDo: [ counter := counter + 1 ].
+	
+	"Did we run the simulation until the end?"
+	self assert: simulation currentTimeStep equals: simulation class defaultFinalTimeStep.
+	
+	"Did we execute the given block (increase the counter) after each step?"
+	self assert: counter equals: simulation class defaultFinalTimeStep.
+]
+
+{ #category : 'tests' }
+CMSimulationTest >> testRunAllStepsAfterEachThreeStepsDo [
+
+	| finalStep stepsWhenBlockIsExecuted  |
+	
+	"Run 10 steps of a simulation - we need this number to be even"
+	finalStep := 10.
+	simulation stopAfterStep: finalStep.
+	
+	stepsWhenBlockIsExecuted := OrderedCollection new.
+	simulation runAllStepsAfterEach: 3 do: [ stepsWhenBlockIsExecuted add: simulation currentTimeStep ].
+	
+	"Did we run the simulation until the end?"
+	self assert: simulation currentTimeStep equals: finalStep.
+	
+	"Exact steps when the block must be executed"
+	"Important: on step 10, the block is not executed but simulation still runs on that step"
+	self assertCollection: stepsWhenBlockIsExecuted hasSameElements: #(3 6 9)
+]
+
+{ #category : 'tests' }
+CMSimulationTest >> testRunAllStepsAfterEachTwoStepsDo [
+
+	| finalStep stepsWhenBlockIsExecuted  |
+	
+	"Run 10 steps of a simulation - we need this number to be even"
+	finalStep := 10.
+	simulation stopAfterStep: finalStep.
+	
+	stepsWhenBlockIsExecuted := OrderedCollection new.
+	simulation runAllStepsAfterEach: 2 do: [ stepsWhenBlockIsExecuted add: simulation currentTimeStep ].
+	
+	"Did we run the simulation until the end?"
+	self assert: simulation currentTimeStep equals: finalStep.
+	
+	"Exact steps when the block must be executed"
+	self assertCollection: stepsWhenBlockIsExecuted hasSameElements: #(2 4 6 8 10)
 ]
 
 { #category : 'tests' }

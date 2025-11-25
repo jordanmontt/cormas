@@ -320,20 +320,7 @@ CMSimulationRunnerPresenter >> pauseSimulation [
 CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 
 	self beInRunningMode.
-	
-	[ [ [ simulation currentTimeStep < simulation finalTimeStep and: [ shouldPause not ] ] whileTrue: [
-		(displayEveryNumberPresenter number min: (simulation finalTimeStep - simulation currentTimeStep))
-			timesRepeat: [ simulation runStep ].
-			
-		[ self updateAfterStep ] onErrorDo: [ :error |
-			"An ugly hack to silence Roassal errors that are caused by parallel execution"
-			error asString = '#intersect: was sent to nil'
-				ifFalse: [ error signal ] ].
-		
-		(Delay forMilliseconds: self speedInMilliseconds) wait ]
-	] ensure: [
-		shouldPause := false.
-		self beInPauseMode ] ] fork.
+	simulationProcess resume
 ]
 
 { #category : 'accessing - model' }
@@ -427,12 +414,6 @@ CMSimulationRunnerPresenter >> updateChart [
 CMSimulationRunnerPresenter >> updateDataTable [
 
 	dataTable showData: simulation data
-]
-
-{ #category : 'as yet unclassified' }
-CMSimulationRunnerPresenter >> updateFinalTimeStep: aNumber [
-
-	simulation finalTimeStep: aNumber
 ]
 
 { #category : 'update presenters' }

@@ -51,7 +51,7 @@ CMSensitivityAnalysis >> addSimulationForParameter: aParameter value: aValue [
 	simulation := (CMSimulation for: modelClass)
 		activeInitSelector: activeInitSelector;
 		activeControlSelector: activeControlSelector;
-		finalTimeStep: finalTimeStep;
+		stopAfterStep: finalTimeStep;
 		shouldReleaseRandomSeedAfterInitialization: releaseRandomSeedAfterInit;
 		yourself.
 		

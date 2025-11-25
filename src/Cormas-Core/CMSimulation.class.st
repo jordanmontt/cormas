@@ -7,8 +7,8 @@ Class {
 		'randomNumberGenerator',
 		'currentRunNumber',
 		'currentTimeStep',
+		'stopCondition',
 		'data',
-		'finalTimeStep',
 		'activeInitSelector',
 		'activeControlSelector',
 		'probes',
@@ -77,19 +77,6 @@ CMSimulation >> data [
 ]
 
 { #category : 'settings' }
-CMSimulation >> finalTimeStep [
-
-	^ finalTimeStep
-]
-
-{ #category : 'settings' }
-CMSimulation >> finalTimeStep: anInteger [
-
-	finalTimeStep := anInteger
-	
-]
-
-{ #category : 'settings' }
 CMSimulation >> initialParameterValues [
 
 	^ initialParameterValues
@@ -100,7 +87,8 @@ CMSimulation >> initialize [
 
 	super initialize.
 	
-	finalTimeStep := self class defaultFinalTimeStep.
+	"Be careful when modifying the stop condition because it can make the simulation (including the tests) run endlesly"
+	stopCondition := [ currentTimeStep >= self class defaultFinalTimeStep ].
 	
 	probes := OrderedCollection new.
 	data := OrderedCollection new.
@@ -172,17 +160,15 @@ CMSimulation >> runAllSteps [
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEach: aNumberOfSteps do: aBlock [
 
-	[ currentTimeStep < finalTimeStep ] whileTrue: [
-		(aNumberOfSteps min: (finalTimeStep - currentTimeStep))
-			timesRepeat: [ self runStep ].
-			
-		aBlock value ]
+	stopCondition whileFalse: [
+		self runStep.
+		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ] ]
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEachDo: aBlock [
 
-	[ currentTimeStep < finalTimeStep ] whileTrue: [
+	stopCondition whileFalse: [
 		self runStep.
 		aBlock value ]
 ]
@@ -196,18 +182,16 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds [
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock [
 
-	[ [ currentTimeStep < finalTimeStep ] whileTrue: [
-		(aNumberOfSteps min: (finalTimeStep - currentTimeStep))
-			timesRepeat: [ self runStep ].
-			
-		aBlock value.
+	[ stopCondition whileFalse: [
+		self runStep.
+		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ].
 		(Delay forMilliseconds: milliseconds) wait ] ] fork.
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 
-	[ [ currentTimeStep < finalTimeStep ] whileTrue: [
+	[ stopCondition whileFalse: [
 		self runStep.
 		aBlock value.
 		(Delay forMilliseconds: milliseconds) wait ] ] fork.
@@ -259,4 +243,16 @@ CMSimulation >> setInitialParametersFor: aCollectionOfParameters [
 CMSimulation >> shouldReleaseRandomSeedAfterInitialization: aBoolean [
 
 	shouldReleaseRandomSeedAfterInitialization := aBoolean
+]
+
+{ #category : 'as yet unclassified' }
+CMSimulation >> stopAfterStep: aNumber [
+	"A syntactic sugar to provide a stop condition that will stop a simulation after a given number of steps"
+	self stopWhen: [ self currentTimeStep >= aNumber ]
+]
+
+{ #category : 'as yet unclassified' }
+CMSimulation >> stopWhen: aBlock [
+	"Be careful when modifying the stop condition because it can make the simulation run endlesly"
+	stopCondition := aBlock
 ]
