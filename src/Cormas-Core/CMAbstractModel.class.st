@@ -69,15 +69,21 @@ CMAbstractModel class >> allEntityClasses [
 ]
 
 { #category : 'available methods' }
+CMAbstractModel class >> availableBooleanSelectors [
+
+	^ (Pragma allNamed: #boolean in: self) collect: [ :each | each methodSelector ]
+]
+
+{ #category : 'available methods' }
 CMAbstractModel class >> availableControlSelectors [
 
-	^ (Pragma allNamed: #control in: self) collect: [ :each | each method selector ]
+	^ (Pragma allNamed: #control in: self) collect: [ :each | each methodSelector ]
 ]
 
 { #category : 'available methods' }
 CMAbstractModel class >> availableInitSelectors [
 
-	^ (Pragma allNamed: #init in: self) collect: [ :each | each method selector ]
+	^ (Pragma allNamed: #init in: self) collect: [ :each | each methodSelector ]
 ]
 
 { #category : 'available probes' }
@@ -87,7 +93,7 @@ CMAbstractModel class >> availableProbes [
 		CMProbe new
 			name: pragma arguments first;
 			colorString: pragma arguments second;
-			selector: pragma method selector;
+			selector: pragma methodSelector;
 			yourself ].
 ]
 
