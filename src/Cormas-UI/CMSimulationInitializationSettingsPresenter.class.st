@@ -77,7 +77,6 @@ CMSimulationInitializationSettingsPresenter >> defaultLayout [
 					add: controlSelectorDropList span: 2 @ 1 ].
 
 	^ SpBoxLayout newTopToBottom
-		  spacing: 12;
 		  add: gridLayout expand: true;
 		  yourself
 ]
