@@ -4,8 +4,6 @@ Class {
 	#instVars : [
 		'modelClass',
 		'cormasModel',
-		'randomNumberGenerator',
-		'currentRunNumber',
 		'currentTimeStep',
 		'stopCondition',
 		'data',
