@@ -3,6 +3,7 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'modelClass',
+		'randomSeed',
 		'cormasModel',
 		'currentTimeStep',
 		'stopCondition',
@@ -28,7 +29,7 @@ CMSimulation class >> defaultFinalTimeStep [
 CMSimulation class >> for: aModelClass [
 
 	^ self new
-		initializeModelClass: aModelClass;
+		modelClass: aModelClass;
 		yourself
 ]
 
@@ -90,13 +91,6 @@ CMSimulation >> initialize [
 ]
 
 { #category : 'initialization' }
-CMSimulation >> initializeModelClass: aClass [
-
-	cormasModel := aClass new.
-	self initializeProbes
-]
-
-{ #category : 'initialization' }
 CMSimulation >> initializeProbes [
 
 	probes := cormasModel class availableProbes.
@@ -107,6 +101,13 @@ CMSimulation >> initializeProbes [
 CMSimulation >> initializeSimulation [
 "Purpose: initialize one simulation by performing #activeInitSelector.
 Reset the currentTimeStep and the data. Set the randomSeed"
+
+	cormasModel := modelClass new.
+	
+	randomSeed ifNotNil: [
+		cormasModel randomSeed: randomSeed ].
+	
+	self initializeProbes.
 
 	currentTimeStep := 0.
 	data := OrderedCollection new.
@@ -123,6 +124,12 @@ Reset the currentTimeStep and the data. Set the randomSeed"
 		cormasModel randomSeed: cormasModel chooseRandomSeedAtRandom ].
 ]
 
+{ #category : 'initialization' }
+CMSimulation >> modelClass: aClass [
+
+	modelClass := aClass
+]
+
 { #category : 'accessing' }
 CMSimulation >> probes [
 
@@ -132,7 +139,7 @@ CMSimulation >> probes [
 { #category : 'settings' }
 CMSimulation >> randomSeed: aNumber [
 
-	cormasModel randomSeed: aNumber
+	randomSeed := aNumber
 ]
 
 { #category : 'data' }
