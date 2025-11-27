@@ -12,7 +12,7 @@ Class {
 		'probes',
 		'initialParameterValues',
 		'shouldReleaseRandomSeedAfterInitialization',
-		'simulationProcess'
+		'simulationRunner'
 	],
 	#category : 'Cormas-Core-Kernel',
 	#package : 'Cormas-Core',
@@ -87,7 +87,9 @@ CMSimulation >> initialize [
 	data := OrderedCollection new.
 	initialParameterValues := Dictionary new.
 	
-	shouldReleaseRandomSeedAfterInitialization := false
+	shouldReleaseRandomSeedAfterInitialization := false.
+	
+	self initializeSimulationRunner
 ]
 
 { #category : 'initialization' }
@@ -123,10 +125,25 @@ Reset the currentTimeStep and the data. Set the randomSeed"
 		cormasModel randomSeed: cormasModel chooseRandomSeedAtRandom ].
 ]
 
-{ #category : 'accessing' }
-CMSimulation >> isProcessCreated [
+{ #category : 'running' }
+CMSimulation >> initializeSimulationRunner [
 
-	^ simulationProcess isNotNil
+	simulationRunner := CMSimulationProcessRunner new
+		cormasSimulation: self;
+		cormasModel: cormasModel;
+		stopCondition: stopCondition
+]
+
+{ #category : 'testing' }
+CMSimulation >> isSimulationProcessConfigured [
+
+	^ simulationRunner isProcessConfigured
+]
+
+{ #category : 'testing' }
+CMSimulation >> isSimulationRunning [ 
+
+	^ simulationRunner isSimulationRunning
 ]
 
 { #category : 'initialization' }
@@ -158,44 +175,55 @@ CMSimulation >> recordData [
 { #category : 'running' }
 CMSimulation >> runAllSteps [
 
-	self runAllStepsAfterEachDo: [ "nothing" ]
+	self initializeSimulationRunner.
+	simulationRunner
+		beDefaultSimulation;
+		run
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEach: aNumberOfSteps do: aBlock [
 
-	[ stopCondition value: cormasModel ] whileFalse: [
-		self runStep.
-		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ] ]
+	self initializeSimulationRunner.
+	simulationRunner
+		beSimulationAfterEach: aNumberOfSteps do: aBlock;
+		run
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEachDo: aBlock [
 
-	self runAllStepsAfterEach: 1 do: aBlock
+	self initializeSimulationRunner.
+	simulationRunner
+		beSimulationAfterEachDo: aBlock;
+		run
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds [
 
-	self runAllStepsWithStepDelay: milliseconds afterEachDo: [ "nothing" ]
+	self initializeSimulationRunner.
+	simulationRunner
+		beSimulationWithStepDelay: milliseconds;
+		runInBackground
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock [
 
-	simulationProcess := [ [ stopCondition value: cormasModel ] whileFalse: [
-		self runStep.
-		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ].
-		(Delay forMilliseconds: milliseconds) wait ] ] newProcess.
-
-	simulationProcess resume
+	self initializeSimulationRunner.
+	simulationRunner
+		beSimulationWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock;
+		runInBackground
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 
-	self runAllStepsWithStepDelay: milliseconds afterEach: 1 do: aBlock
+	self initializeSimulationRunner.
+	simulationRunner
+		beSimulationWithStepDelay: milliseconds afterEachDo: aBlock;
+		runInBackground
 ]
 
 { #category : 'running' }
@@ -249,9 +277,9 @@ CMSimulation >> shouldReleaseRandomSeedAfterInitialization: aBoolean [
 ]
 
 { #category : 'accessing' }
-CMSimulation >> simulationProcess [
+CMSimulation >> simulationRunner [
 
-	^ simulationProcess
+	^ simulationRunner
 ]
 
 { #category : 'as yet unclassified' }
