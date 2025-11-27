@@ -64,7 +64,9 @@ CMDataPresenter >> initializeToolbar [
 
 	CMDataPresenterCommand sortedSubclasses do: [ :aClass |
 		| command |
-		command := aClass forOwner: self translator: translator.
+		command := (aClass forOwner: self translator: translator)
+			cormasIconProvider: CMIcons;
+			yourself.
 		toolbar add: command toolbarButton ].
 ]
 

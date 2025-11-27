@@ -9,12 +9,6 @@ Trait {
 }
 
 { #category : 'as yet unclassified' }
-TCMCommand classSide >> forOwner: anObject [
-
-	^ self forOwner: anObject translator: CMEnglishTranslator new
-]
-
-{ #category : 'as yet unclassified' }
 TCMCommand classSide >> forOwner: aPresenter translator: aTranslator [
 
 	^ self new

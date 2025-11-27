@@ -29,7 +29,7 @@ CMSaveToCsvCommand >> action [
 { #category : 'accessing' }
 CMSaveToCsvCommand >> icon [
 
-	^ CMIcons csvIcon
+	^ cormasIconProvider csvIcon
 ]
 
 { #category : 'accessing' }

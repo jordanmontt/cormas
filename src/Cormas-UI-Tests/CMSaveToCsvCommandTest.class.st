@@ -21,7 +21,7 @@ CMSaveToCsvCommandTest >> setUp [
 	dataPresenter := CMDataPresenter forTranslator: CMEnglishTranslator new.
 	dataPresenter showData: fixture data.
 	
-	command := CMSaveToCsvCommand forOwner: dataPresenter 
+	command := CMSaveToCsvCommand forOwner: dataPresenter translator: CMEnglishTranslator new
 ]
 
 { #category : 'tests' }

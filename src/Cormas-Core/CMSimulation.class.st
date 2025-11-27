@@ -11,7 +11,8 @@ Class {
 		'activeControlSelector',
 		'probes',
 		'initialParameterValues',
-		'shouldReleaseRandomSeedAfterInitialization'
+		'shouldReleaseRandomSeedAfterInitialization',
+		'simulationProcess'
 	],
 	#category : 'Cormas-Core-Kernel',
 	#package : 'Cormas-Core',
@@ -122,6 +123,12 @@ Reset the currentTimeStep and the data. Set the randomSeed"
 		cormasModel randomSeed: cormasModel chooseRandomSeedAtRandom ].
 ]
 
+{ #category : 'accessing' }
+CMSimulation >> isProcessCreated [
+
+	^ simulationProcess isNotNil
+]
+
 { #category : 'initialization' }
 CMSimulation >> modelClass: aClass [
 
@@ -165,9 +172,7 @@ CMSimulation >> runAllStepsAfterEach: aNumberOfSteps do: aBlock [
 { #category : 'running' }
 CMSimulation >> runAllStepsAfterEachDo: aBlock [
 
-	[ stopCondition value: cormasModel ] whileFalse: [
-		self runStep.
-		aBlock value ]
+	self runAllStepsAfterEach: 1 do: aBlock
 ]
 
 { #category : 'running' }
@@ -179,19 +184,18 @@ CMSimulation >> runAllStepsWithStepDelay: milliseconds [
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock [
 
-	[ [ stopCondition value: cormasModel ] whileFalse: [
+	simulationProcess := [ [ stopCondition value: cormasModel ] whileFalse: [
 		self runStep.
 		self currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ].
-		(Delay forMilliseconds: milliseconds) wait ] ] fork.
+		(Delay forMilliseconds: milliseconds) wait ] ] newProcess.
+
+	simulationProcess resume
 ]
 
 { #category : 'running' }
 CMSimulation >> runAllStepsWithStepDelay: milliseconds afterEachDo: aBlock [
 
-	[ [ stopCondition value: cormasModel ] whileFalse: [
-		self runStep.
-		aBlock value.
-		(Delay forMilliseconds: milliseconds) wait ] ] fork.
+	self runAllStepsWithStepDelay: milliseconds afterEach: 1 do: aBlock
 ]
 
 { #category : 'running' }
@@ -242,6 +246,12 @@ CMSimulation >> setInitialParametersFor: aCollectionOfParameters [
 CMSimulation >> shouldReleaseRandomSeedAfterInitialization: aBoolean [
 
 	shouldReleaseRandomSeedAfterInitialization := aBoolean
+]
+
+{ #category : 'accessing' }
+CMSimulation >> simulationProcess [
+
+	^ simulationProcess
 ]
 
 { #category : 'as yet unclassified' }
