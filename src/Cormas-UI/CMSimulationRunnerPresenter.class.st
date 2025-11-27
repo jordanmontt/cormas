@@ -14,8 +14,7 @@ Class {
 		'chartPresenter',
 		'spacePage',
 		'dataPage',
-		'chartsPage',
-		'simulationProcess'
+		'chartsPage'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -159,24 +158,6 @@ CMSimulationRunnerPresenter >> hideSettings [
 	"owner hideInitializationSettings."
 	self update.
 	self fitDiagram
-]
-
-{ #category : 'initialization' }
-CMSimulationRunnerPresenter >> initialize [
-
-	super initialize.
-		
-	simulationProcess := [ [
-		simulation
-			runAllStepsWithStepDelay: self speedInMilliseconds
-			afterEach: displayEveryNumberPresenter number
-			do: [ 
-				[ self updateAfterStep ] onErrorDo: [ :error |
-					"An ugly hack to silence Roassal errors that are caused by parallel execution"
-					error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
-	] ensure: [ 'Ensure is executed' traceCr. self beInPauseMode ] ].
-
-	simulationProcess := simulationProcess newProcess
 ]
 
 { #category : 'public' }
@@ -333,15 +314,13 @@ CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 	
 	self beInRunningMode.
 	
-	 [
-		simulation
-			runAllStepsWithStepDelay: self speedInMilliseconds
-			afterEach: displayEveryNumberPresenter number
-			do: [ 
-				[ self updateAfterStep ] onErrorDo: [ :error |
-					"An ugly hack to silence Roassal errors that are caused by parallel execution"
-					error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
-	] ensure: [ 'Ensure is executed' traceCr. self beInPauseMode ]
+	simulation
+		runAllStepsWithStepDelay: self speedInMilliseconds
+		afterEach: displayEveryNumberPresenter number
+		do: [ 
+			[ self updateAfterStep ] onErrorDo: [ :error |
+				"An ugly hack to silence Roassal errors that are caused by parallel execution"
+				error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
 ]
 
 { #category : 'accessing - model' }
