@@ -14,8 +14,7 @@ Class {
 		'chartPresenter',
 		'spacePage',
 		'dataPage',
-		'chartsPage',
-		'simulationProcess'
+		'chartsPage'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -161,32 +160,6 @@ CMSimulationRunnerPresenter >> hideSettings [
 	self fitDiagram
 ]
 
-{ #category : 'initialization' }
-CMSimulationRunnerPresenter >> initialize [
-
-	super initialize.
-		
-	simulationProcess := [ [
-		simulation
-			runAllStepsWithStepDelay: self speedInMilliseconds
-			afterEach: displayEveryNumberPresenter number
-			do: [ 
-				[ self updateAfterStep ] onErrorDo: [ :error |
-					"An ugly hack to silence Roassal errors that are caused by parallel execution"
-					error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
-		
-		"[ false ] whileFalse: [
-			displayEveryNumberPresenter number timesRepeat: [ simulation runStep ].
-			
-			[ self updateAfterStep ] onErrorDo: [ :error |
-				""An ugly hack to silence Roassal errors that are caused by parallel execution""
-				error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ].
-		
-			(Delay forMilliseconds: self speedInMilliseconds) wait ]" ]
-		ensure: [ self beInPauseMode ] ].
-	simulationProcess := simulationProcess newProcess
-]
-
 { #category : 'public' }
 CMSimulationRunnerPresenter >> initializeCharts [
 
@@ -290,7 +263,9 @@ CMSimulationRunnerPresenter >> initializeRunButtonWithRunAction [
 
 	runButton
 		icon: CMIcons runIcon;
-		action: [ self runSimulationUntilEnd ]
+		action: [ simulation isProcessCreated
+			ifFalse: [ self runSimulationUntilEnd ]
+			ifTrue: [ self resumeSimulation ] ]
 ]
 
 { #category : 'initialization' }
@@ -321,14 +296,31 @@ CMSimulationRunnerPresenter >> initializeWithSimulation [
 CMSimulationRunnerPresenter >> pauseSimulation [
 
 	self beInPauseMode.
-	simulationProcess suspend
+	simulation simulationProcess suspend
+]
+
+{ #category : 'actions' }
+CMSimulationRunnerPresenter >> resumeSimulation [
+
+	self beInRunningMode.
+	simulation simulationProcess resume
 ]
 
 { #category : 'actions' }
 CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 
+	"self beInRunningMode.
+	simulation simulationProcess resume"
+	
 	self beInRunningMode.
-	simulationProcess resume
+	
+	simulation
+		runAllStepsWithStepDelay: self speedInMilliseconds
+		afterEach: displayEveryNumberPresenter number
+		do: [ 
+			[ self updateAfterStep ] onErrorDo: [ :error |
+				"An ugly hack to silence Roassal errors that are caused by parallel execution"
+				error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
 ]
 
 { #category : 'accessing - model' }

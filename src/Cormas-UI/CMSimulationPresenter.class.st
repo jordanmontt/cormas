@@ -61,12 +61,6 @@ CMSimulationPresenter >> example [
 	<script: 'self example'>
 ]
 
-{ #category : 'settings' }
-CMSimulationPresenter >> finalTimeStep [
-	
-	^ simulationRunner finalTimeStep
-]
-
 { #category : 'as yet unclassified' }
 CMSimulationPresenter >> hideOrShowFancyNotebookPage [
 
