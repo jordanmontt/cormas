@@ -9,7 +9,8 @@ Class {
 		'choice',
 		'finalStepInput',
 		'dummyTextInput',
-		'stopConditionDropList'
+		'stopConditionDropList',
+		'onChangedBlock'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -31,12 +32,53 @@ CMStopConditionPresenter >> activateFinalStep [
 		finalStepInput number: CMSimulation defaultFinalTimeStep ]
 ]
 
+{ #category : 'compiling' }
+CMStopConditionPresenter >> compileBlock: aSourceCode [
+
+	"Black magic"
+	^ Smalltalk compiler
+		environment: self class environment;
+		source: aSourceCode;
+		evaluate
+]
+
+{ #category : 'accessing' }
+CMStopConditionPresenter >> condition [
+	"Note: we want to minimize the complexity of the returned block because it will be evaluated after each simulation step"
+
+	"Case 1: Run simulation endlessly until paused"
+	(hasFinalStepCheckbox state not and: [ stopConditionDropList isPlaceholderSelected ]) ifTrue: [ 
+		^ [ :model | false ] ].
+	
+	"Case 2: Combine both stop criteria"
+	(hasFinalStepCheckbox state and: [ stopConditionDropList isPlaceholderSelected not ]) ifTrue: [ 
+		^ self compileBlock: ('[ :model |
+			model currentTimeStep >= ', finalStepInput number asString, ' or: [
+				model ', stopConditionDropList selectedItem, ' ] ]') ].
+	
+	"Case 3: Stop after a given number of steps"
+	hasFinalStepCheckbox state ifTrue: [ 
+		^ self compileBlock: ('[ :model | model currentTimeStep >= ', finalStepInput number asString, ' ]') ].
+	
+	"Case 4: Stop when a selected boolean method returns true"
+	stopConditionDropList isPlaceholderSelected ifFalse: [ 
+		^ self compileBlock: ('[ :model | model ', stopConditionDropList selectedItem, ' ]') ].
+	
+	self error: 'This should never happen'
+]
+
 { #category : 'initialization' }
 CMStopConditionPresenter >> connectPresenters [
 
+	onChangedBlock := [ :conditionBlock | "do nothing" ].
+
 	hasFinalStepCheckbox
 		whenActivatedDo: [ self activateFinalStep ];
-		whenDeactivatedDo: [ self deactivateFinalStep ].
+		whenDeactivatedDo: [ self deactivateFinalStep ];
+		whenChangedDo: [ onChangedBlock value: self condition ].
+		
+	finalStepInput whenNumberChangedDo: [ onChangedBlock value: self condition ].
+	stopConditionDropList whenSelectionChangedDo: [ onChangedBlock value: self condition ]
 	
 ]
 
@@ -113,4 +155,13 @@ CMStopConditionPresenter >> setModelBeforeInitialization: aCollection [
 
 	cormasModelClass := aCollection first.
 	translator := aCollection second
+]
+
+{ #category : 'announcing' }
+CMStopConditionPresenter >> whenChangedDo: aBlock [
+	"A one argument block accepting a stop condition block that is constructed by this UI"
+	onChangedBlock := aBlock.
+	
+	"In case nothing is changed"
+	onChangedBlock value: self condition
 ]

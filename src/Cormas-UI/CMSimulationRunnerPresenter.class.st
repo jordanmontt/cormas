@@ -167,14 +167,22 @@ CMSimulationRunnerPresenter >> initialize [
 	super initialize.
 		
 	simulationProcess := [ [
-		[ false ] whileFalse: [
+		simulation
+			runAllStepsWithStepDelay: self speedInMilliseconds
+			afterEach: displayEveryNumberPresenter number
+			do: [ 
+				[ self updateAfterStep ] onErrorDo: [ :error |
+					"An ugly hack to silence Roassal errors that are caused by parallel execution"
+					error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
+		
+		"[ false ] whileFalse: [
 			displayEveryNumberPresenter number timesRepeat: [ simulation runStep ].
 			
 			[ self updateAfterStep ] onErrorDo: [ :error |
-				"An ugly hack to silence Roassal errors that are caused by parallel execution"
+				""An ugly hack to silence Roassal errors that are caused by parallel execution""
 				error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ].
 		
-			(Delay forMilliseconds: self speedInMilliseconds) wait ] ]
+			(Delay forMilliseconds: self speedInMilliseconds) wait ]" ]
 		ensure: [ self beInPauseMode ] ].
 	simulationProcess := simulationProcess newProcess
 ]
