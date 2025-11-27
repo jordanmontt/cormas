@@ -331,7 +331,6 @@ CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 	"self beInRunningMode.
 	simulation simulationProcess resume"
 	
-	self halt.
 	self beInRunningMode.
 	
 	 [
