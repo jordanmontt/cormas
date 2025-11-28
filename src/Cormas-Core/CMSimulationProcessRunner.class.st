@@ -4,7 +4,6 @@ Class {
 	#instVars : [
 		'simulationProcess',
 		'stopCondition',
-		'cormasModel',
 		'simulation',
 		'simulationBlock'
 	],
@@ -17,7 +16,7 @@ Class {
 CMSimulationProcessRunner >> beDefaultSimulation [
 
 	simulationBlock := [
-		[ stopCondition value: cormasModel ] whileFalse: [
+		[ stopCondition value: simulation cormasModel ] whileFalse: [
 			simulation runStep ] ]
 ]
 
@@ -25,7 +24,7 @@ CMSimulationProcessRunner >> beDefaultSimulation [
 CMSimulationProcessRunner >> beSimulationAfterEach: aNumberOfSteps do: aBlock [
 
 	simulationBlock := [ 
-		[ stopCondition value: cormasModel ] whileFalse: [
+		[ stopCondition value: simulation cormasModel ] whileFalse: [
 			simulation runStep.
 			simulation currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ] ] ]
 ]
@@ -34,7 +33,7 @@ CMSimulationProcessRunner >> beSimulationAfterEach: aNumberOfSteps do: aBlock [
 CMSimulationProcessRunner >> beSimulationAfterEachDo: aBlock [
 
 	simulationBlock := [ 
-		[ stopCondition value: cormasModel ] whileFalse: [
+		[ stopCondition value: simulation cormasModel ] whileFalse: [
 			simulation runStep.
 			aBlock value ] ]
 ]
@@ -43,7 +42,7 @@ CMSimulationProcessRunner >> beSimulationAfterEachDo: aBlock [
 CMSimulationProcessRunner >> beSimulationWithStepDelay: milliseconds [
 
 	simulationBlock := [
-		[ stopCondition value: cormasModel ] whileFalse: [
+		[ stopCondition value: simulation cormasModel ] whileFalse: [
 			simulation runStep.
 			(Delay forMilliseconds: milliseconds) wait ] ]
 ]
@@ -52,7 +51,7 @@ CMSimulationProcessRunner >> beSimulationWithStepDelay: milliseconds [
 CMSimulationProcessRunner >> beSimulationWithStepDelay: milliseconds afterEach: aNumberOfSteps do: aBlock [
 
 	simulationBlock := [
-		[ stopCondition value: cormasModel ] whileFalse: [
+		[ stopCondition value: simulation cormasModel ] whileFalse: [
 			simulation runStep.
 			simulation currentTimeStep % aNumberOfSteps = 0 ifTrue: [ aBlock value ].
 			(Delay forMilliseconds: milliseconds) wait ] ]
@@ -62,16 +61,10 @@ CMSimulationProcessRunner >> beSimulationWithStepDelay: milliseconds afterEach: 
 CMSimulationProcessRunner >> beSimulationWithStepDelay: milliseconds afterEachDo: aBlock [
 
 	simulationBlock := [
-		[ stopCondition value: cormasModel ] whileFalse: [
+		[ stopCondition value: simulation cormasModel ] whileFalse: [
 			simulation runStep.
 			aBlock value.
 			(Delay forMilliseconds: milliseconds) wait ] ]
-]
-
-{ #category : 'accessing' }
-CMSimulationProcessRunner >> cormasModel: aCMMockModel [
-
-	cormasModel := aCMMockModel
 ]
 
 { #category : 'accessing' }

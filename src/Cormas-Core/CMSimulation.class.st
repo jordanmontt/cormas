@@ -130,7 +130,6 @@ CMSimulation >> initializeSimulationRunner [
 
 	simulationRunner := CMSimulationProcessRunner new
 		cormasSimulation: self;
-		cormasModel: cormasModel;
 		stopCondition: stopCondition
 ]
 
