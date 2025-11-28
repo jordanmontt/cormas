@@ -263,7 +263,7 @@ CMSimulationRunnerPresenter >> initializeRunButtonWithRunAction [
 
 	runButton
 		icon: CMIcons runIcon;
-		action: [ simulation isProcessCreated
+		action: [ simulation isSimulationProcessConfigured
 			ifFalse: [ self runSimulationUntilEnd ]
 			ifTrue: [ self resumeSimulation ] ]
 ]
@@ -296,31 +296,27 @@ CMSimulationRunnerPresenter >> initializeWithSimulation [
 CMSimulationRunnerPresenter >> pauseSimulation [
 
 	self beInPauseMode.
-	simulation simulationProcess suspend
+	simulation simulationRunner pause
 ]
 
 { #category : 'actions' }
 CMSimulationRunnerPresenter >> resumeSimulation [
 
 	self beInRunningMode.
-	simulation simulationProcess resume
+	simulation simulationRunner resume
 ]
 
 { #category : 'actions' }
 CMSimulationRunnerPresenter >> runSimulationUntilEnd [
 
-	"self beInRunningMode.
-	simulation simulationProcess resume"
-	
 	self beInRunningMode.
-	
+
 	simulation
 		runAllStepsWithStepDelay: self speedInMilliseconds
 		afterEach: displayEveryNumberPresenter number
-		do: [ 
+		do: [
 			[ self updateAfterStep ] onErrorDo: [ :error |
-				"An ugly hack to silence Roassal errors that are caused by parallel execution"
-				error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
+					error asString = '#intersect: was sent to nil' ifFalse: [ error signal ] ] ]
 ]
 
 { #category : 'accessing - model' }
