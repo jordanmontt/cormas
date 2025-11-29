@@ -77,8 +77,9 @@ CMSimulationPresenter >> initializeFancyNotebook [
 		
 	| pages selectedPage |
 	
-	pages := (Pragma allNamed: #fancyNotebookPage in: self class) collect: [ :pragma |
-		self perform: pragma methodSelector ].
+	pages := ((Pragma allNamed: #fancyNotebookPageOrder: in: self class)
+		sorted: [ :a :b | a arguments first < b arguments first ])
+		collect: [ :pragma | self perform: pragma methodSelector ].
 	
 	fancyNotebookButtons := pages collect: [ :page |
 		self newToggleButton
@@ -178,7 +179,7 @@ CMSimulationPresenter >> setModelBeforeInitialization: aCollection [
 
 { #category : 'as yet unclassified' }
 CMSimulationPresenter >> settingsRandomNumbers [
-	<fancyNotebookPage>
+	<fancyNotebookPageOrder: 5>
 	
 	^ SpNotebookPage
 		title: 'Random numbers'
@@ -190,7 +191,7 @@ CMSimulationPresenter >> settingsRandomNumbers [
 
 { #category : 'as yet unclassified' }
 CMSimulationPresenter >> settingsSimulationInitializer [
-	<fancyNotebookPage>
+	<fancyNotebookPageOrder: 1>
 	
 	^ SpNotebookPage
 		title: 'Initialize simulation'
@@ -205,7 +206,7 @@ CMSimulationPresenter >> settingsSimulationInitializer [
 
 { #category : 'as yet unclassified' }
 CMSimulationPresenter >> settingsStopCondition [
-	<fancyNotebookPage>
+	<fancyNotebookPageOrder: 3>
 	
 	^ SpNotebookPage
 		title: 'Stop condition'
