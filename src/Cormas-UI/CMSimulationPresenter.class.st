@@ -165,9 +165,15 @@ CMSimulationPresenter >> initializeWindow: aWindowPresenter [
 	super initializeWindow: aWindowPresenter.
 
 	aWindowPresenter 
-		title: (modelClass modelName, ' - Simulation');
+		title: self presenterWindowTitle;
 		initialExtent: 1000@600;
 		whenResizingDo: [ simulationRunner fitDiagram ].
+]
+
+{ #category : 'initialization' }
+CMSimulationPresenter >> presenterWindowTitle [
+	"We extract it here to allow customization in subclasses"
+	^ modelClass modelName, ' - Simulation'
 ]
 
 { #category : 'accessing - model' }
