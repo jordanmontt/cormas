@@ -26,6 +26,21 @@ CMSimulationPresenter class >> forModelClass: aClass translator: aTranslator [
 	^ self on: { aClass . aTranslator }
 ]
 
+{ #category : 'as yet unclassified' }
+CMSimulationPresenter >> collectFancyNotebookPages [
+
+	| pragmas |
+	
+	"To make sure that we can still do it on subclasses"
+	pragmas := Pragma
+		allNamed: #fancyNotebookPageOrder:
+		from: self class
+		to: CMSimulationPresenter
+		sortedByArgument: 1.
+
+	^ pragmas collect: [ :pragma | self perform: pragma methodSelector ]
+]
+
 { #category : 'compiling' }
 CMSimulationPresenter >> compileBlock: aSourceCode [
 
@@ -77,9 +92,7 @@ CMSimulationPresenter >> initializeFancyNotebook [
 		
 	| pages selectedPage |
 	
-	pages := ((Pragma allNamed: #fancyNotebookPageOrder: in: self class)
-		sorted: [ :a :b | a arguments first < b arguments first ])
-		collect: [ :pragma | self perform: pragma methodSelector ].
+	pages := self collectFancyNotebookPages.
 	
 	fancyNotebookButtons := pages collect: [ :page |
 		self newToggleButton
