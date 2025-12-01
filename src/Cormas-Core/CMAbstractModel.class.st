@@ -42,7 +42,8 @@ Class {
 		'entities',
 		'cellClass',
 		'agentClasses',
-		'areAgentsCenteredInCells'
+		'areAgentsCenteredInCells',
+		'hooksHandler'
 	],
 	#classInstVars : [
 		'cellClass',
@@ -936,6 +937,7 @@ CMAbstractModel >> initialize [
 	self initializeModelClasses.
 	self initializeSpaceModel.
 	self initializeParameters.
+	self initializeHooks.
 	
 	areAgentsCenteredInCells := true
 ]
@@ -947,6 +949,13 @@ CMAbstractModel >> initializeAgentsOfClass: aClass [
 		(self entitiesOfClass: aClass) do: [ :each | each leave ] ].
 		
 	self resetEntities: aClass
+]
+
+{ #category : 'initialization' }
+CMAbstractModel >> initializeHooks [
+	"Override me to add hooks"
+
+	hooksHandler := CMHooksHandler new
 ]
 
 { #category : 'initialization' }
