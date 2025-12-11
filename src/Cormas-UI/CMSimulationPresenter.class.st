@@ -8,7 +8,8 @@ Class {
 		'fancyNotebookPage',
 		'stopConditionPresenter',
 		'simulationRunner',
-		'simulation'
+		'simulation',
+		'whenWindowsIsClosedHooks'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -85,6 +86,14 @@ CMSimulationPresenter >> hideOrShowFancyNotebookPage [
 		
 	"if we don't do this, the width of the page will not be applied in the layout"
 	self update
+]
+
+{ #category : 'initialization' }
+CMSimulationPresenter >> initialize [
+
+	whenWindowsIsClosedHooks := OrderedCollection new.
+	"Call super after initializing the hooks variable"
+	super initialize
 ]
 
 { #category : 'initialization' }
@@ -180,7 +189,8 @@ CMSimulationPresenter >> initializeWindow: aWindowPresenter [
 	aWindowPresenter 
 		title: self presenterWindowTitle;
 		initialExtent: 1000@600;
-		whenResizingDo: [ simulationRunner fitDiagram ].
+		whenResizingDo: [ simulationRunner fitDiagram ];
+		whenClosedDo: [ whenWindowsIsClosedHooks do: #value ]
 ]
 
 { #category : 'initialization' }
