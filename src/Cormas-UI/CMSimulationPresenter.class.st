@@ -9,7 +9,7 @@ Class {
 		'stopConditionPresenter',
 		'simulationRunner',
 		'simulation',
-		'whenWindowsIsClosedHooks'
+		'whenWindowIsClosedHooks'
 	],
 	#category : 'Cormas-UI',
 	#package : 'Cormas-UI'
@@ -91,7 +91,7 @@ CMSimulationPresenter >> hideOrShowFancyNotebookPage [
 { #category : 'initialization' }
 CMSimulationPresenter >> initialize [
 
-	whenWindowsIsClosedHooks := OrderedCollection new.
+	whenWindowIsClosedHooks := OrderedCollection new.
 	"Call super after initializing the hooks variable"
 	super initialize
 ]
@@ -190,7 +190,7 @@ CMSimulationPresenter >> initializeWindow: aWindowPresenter [
 		title: self presenterWindowTitle;
 		initialExtent: 1000@600;
 		whenResizingDo: [ simulationRunner fitDiagram ];
-		whenClosedDo: [ whenWindowsIsClosedHooks do: #value ]
+		whenClosedDo: [ whenWindowIsClosedHooks do: #value ]
 ]
 
 { #category : 'initialization' }
